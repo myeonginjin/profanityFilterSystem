@@ -16,3 +16,10 @@ public class ChatGPTRequest {
         this.messages.add(new Message("user", prompt));
     }
 }
+//
+//public record ChatGPTRequest(String model, String prompt,
+//                             double temperaturem, int max_tokens) {
+//    public static ChatGPTRequest creat(String prompt) {
+//        return new ChatGPTRequest("text-davinci-003", prompt, 1, 100);
+//    }
+//}
