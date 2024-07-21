@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/bot")
 public class CustomBotController {
@@ -23,21 +26,16 @@ public class CustomBotController {
     private RestTemplate template;
 
     @GetMapping("/chat")
-    public String chat(@RequestParam(name = "prompt") String prompt) {
+    public Map<String, String> chat(@RequestParam(name = "prompt") String prompt) {
         ChatGPTRequest request = new ChatGPTRequest(model, prompt);
-
-        /* 요청 로그 출력
-        System.out.println("Sending request to OpenAI API:");
-        System.out.println(request);
-         */
 
         ChatGPTResponse chatGPTResponse = template.postForObject(apiURL, request, ChatGPTResponse.class);
 
-        /* 응답 로그 출력
-        System.out.println("Received response from OpenAI API:");
-        System.out.println(chatGPTResponse);
-         */
+        String responseContent = chatGPTResponse.getChoices().get(0).getMessage().getContent();
 
-        return chatGPTResponse.getChoices().get(0).getMessage().getContent();
+        Map<String, String> response = new HashMap<>();
+        response.put("response", responseContent);
+
+        return response;
     }
 }

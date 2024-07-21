@@ -1,18 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat with GPT</title>
+    <script>
+        // AJAX 요청을 처리하는 함수
+        function sendMessage(event) {
+            event.preventDefault(); // 폼의 기본 제출 동작을 막음
+
+            const prompt = document.querySelector('input[name="prompt"]').value; // 입력된 메시지 가져오기
+
+            // fetch 함수를 사용하여 비동기적으로 서버에 요청을 보냄
+            fetch('/bot/chat?prompt=' + encodeURIComponent(prompt))
+                .then(response => response.json()) // 서버 응답을 JSON 형태로 변환
+                .then(data => {
+                    // JSON 응답에서 메시지를 추출하여 페이지에 표시
+                    document.getElementById('response').textContent = data.response;
+                })
+                .catch(error => console.error('Error:', error)); // 에러 처리
+        }
+    </script>
 </head>
 <body>
-<form action="/chat" method="post">
+<!-- 폼 제출 시 sendMessage 함수를 호출 -->
+<form onsubmit="sendMessage(event)">
     <input type="text" name="prompt" placeholder="Enter your message" required>
     <button type="submit">Send</button>
 </form>
 
 <h2>Response:</h2>
-<p>Prompt: ${prompt}</p>
-<p>Response: ${response}</p>
+<!-- 서버 응답을 표시할 영역 -->
+<div id="response"></div>
 </body>
 </html>
