@@ -4,6 +4,122 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat with GPT</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 90%;
+            max-width: 1200px;
+            box-sizing: border-box;
+            height: 80vh;
+        }
+        .chat-section, .report-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+            flex: 1;
+        }
+        .chat-section {
+            background-color: #ffffff;
+        }
+        .report-section {
+            padding: 20px;
+            background-color: #e9f5f6;
+            border-radius: 8px;
+            border: 1px solid #d0e6e8;
+        }
+        h2, h3 {
+            color: #333;
+            text-align: center;
+            margin: 0;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+            width: 100%; /* 너비를 100%로 설정 */
+        }
+        .form-group {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        input[name="nickname"],
+        input[name="prompt"],
+        input[name="report-nickname"] {
+            border-radius: 4px;
+            padding: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+            width: 100%; /* 너비를 100%로 설정 */
+        }
+        input[name="nickname"],
+        input[name="report-nickname"] {
+            border: 2px solid #007bff;
+            height: 40px;
+        }
+        input[name="prompt"] {
+            border: 2px solid #28a745;
+            min-height: 100px;
+            resize: vertical;
+        }
+        button {
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            padding: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%; /* 너비를 100%로 설정 */
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #response, #evidence {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 4px;
+            min-height: 100px;
+            box-sizing: border-box;
+            width: 100%; /* 너비를 100%로 설정 */
+        }
+        .chat-section #response {
+            border: 1px solid #ddd;
+        }
+        .report-section #evidence {
+            border: 1px solid #ddd;
+        }
+        .report-section input[name="report-nickname"] {
+            border-color: #dc3545;
+            height: 35px;
+            width: 250px; /* 신고 기능 박스 너비 */
+        }
+        .report-section button {
+            background-color: #dc3545;
+            width: 250px; /* 신고 기능 버튼 너비 */
+        }
+        .report-section button:hover {
+            background-color: #c82333;
+        }
+    </style>
     <script>
         // AJAX 요청을 처리하는 함수
         function sendMessage(event) {
@@ -21,16 +137,58 @@
                 })
                 .catch(error => console.error('Error:', error)); // 에러 처리
         }
+
+        // 신고 기능을 처리하는 함수
+        function reportUser(event) {
+            event.preventDefault(); // 폼의 기본 제출 동작을 막음
+
+            const reportNickname = document.querySelector('input[name="report-nickname"]').value;
+
+            // fetch 함수를 사용하여 비동기적으로 서버에 요청을 보냄
+            fetch(`/bot/report?nickname=${encodeURIComponent(reportNickname)}`)
+                .then(response => response.json()) // 서버 응답을 JSON 형태로 변환
+                .then(data => {
+                    // JSON 응답에서 증거물을 추출하여 페이지에 표시
+                    document.getElementById('evidence').textContent = data.evidence;
+                })
+                .catch(error => console.error('Error:', error)); // 에러 처리
+        }
     </script>
 </head>
 <body>
-<!-- 닉네임과 메시지 입력 폼 -->
-<form onsubmit="sendMessage(event)">
-    <input type="text" name="nickname" placeholder="Enter your nickname" required>
-    <input type="text" name="prompt" placeholder="Enter your message" required>
-    <button type="submit">Send</button>
-</form>
+<div class="container">
+    <!-- 대화 창 섹션 -->
+    <div class="chat-section">
+        <h2>Chat with GPT</h2>
+        <form onsubmit="sendMessage(event)">
+            <div class="form-group">
+                <input type="text" name="nickname" placeholder="Enter your nickname" required>
+            </div>
+            <div class="form-group">
+                <input type="text" name="prompt" placeholder="Enter your message" required>
+            </div>
+            <button type="submit">Send</button>
+        </form>
 
-<h2>Response:</h2>
-<!-- 서버 응답을 표시할 영역 -->
-<div id="response"></div>
+        <div id="response">
+            <!-- 서버 응답을 표시할 영역 -->
+        </div>
+    </div>
+
+    <!-- 신고 기능 섹션 -->
+    <div class="report-section">
+        <h3>Report User</h3>
+        <form onsubmit="reportUser(event)">
+            <div class="form-group">
+                <input type="text" name="report-nickname" placeholder="Enter nickname to report" required>
+            </div>
+            <button type="submit">Report</button>
+        </form>
+
+        <div id="evidence">
+            <!-- 신고 증거물이 표시될 영역 -->
+        </div>
+    </div>
+</div>
+</body>
+</html>

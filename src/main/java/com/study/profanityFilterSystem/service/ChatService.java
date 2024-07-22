@@ -6,6 +6,8 @@ import com.study.profanityFilterSystem.repository.DialogRepository;
 import com.study.profanityFilterSystem.repository.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Service
 public class ChatService {
@@ -32,6 +34,7 @@ public class ChatService {
         dialog.setUserID(userID);
         dialog.setPartnerUserID(partnerUserID);
         dialog.setMessage(message);
+        dialog.setTimestamp(LocalDateTime.now());
         dialogRepository.save(dialog);
         return dialog;
     }

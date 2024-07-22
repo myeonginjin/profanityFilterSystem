@@ -2,6 +2,8 @@ package com.study.profanityFilterSystem.entity;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "dialog")
 public class Dialog {
@@ -20,7 +22,7 @@ public class Dialog {
     private String message;
 
     @Column(name = "timestamp")
-    private java.sql.Timestamp timestamp;
+    private LocalDateTime timestamp;
 
     // Getters and setters
     public Long getDialogID() {
@@ -55,11 +57,11 @@ public class Dialog {
         this.message = message;
     }
 
-    public java.sql.Timestamp getTimestamp() {
+    public LocalDateTime getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(java.sql.Timestamp timestamp) {
+    public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
     }
 }
