@@ -155,6 +155,8 @@
             fetch(`/bot/report?nickname=${encodeURIComponent(reportNickname)}`)
                 .then(response => response.json())
                 .then(data => {
+                    const evidenceDiv = document.getElementById('evidence');
+                    evidenceDiv.innerHTML = ''; // 증거를 추가하기 전에 내용을 초기화
 
                     if (data.status === 'error') {
                         const p = document.createElement('p');
@@ -171,6 +173,7 @@
                 })
                 .catch(error => console.error('Error:', error));
         }
+
 
         function updateCharCount() {
             const promptInput = document.querySelector('textarea[name="prompt"]');
