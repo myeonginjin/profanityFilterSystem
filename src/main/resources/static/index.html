@@ -42,6 +42,7 @@
             background-color: #e9f5f6;
             border-radius: 8px;
             border: 1px solid #d0e6e8;
+            overflow-y: auto; /* 스크롤 가능하도록 설정 */
         }
         h2, h3 {
             color: #333;
@@ -53,31 +54,40 @@
             flex-direction: column;
             gap: 15px;
             align-items: center;
-            width: 100%; /* 너비를 100%로 설정 */
+            width: 100%;
         }
         .form-group {
             width: 100%;
             display: flex;
             justify-content: center;
+            position: relative; /* 부모에 대해 자식 요소를 위치시키기 위함 */
         }
         input[name="nickname"],
-        input[name="prompt"],
+        textarea[name="prompt"],
         input[name="report-nickname"] {
             border-radius: 4px;
             padding: 10px;
             font-size: 16px;
             box-sizing: border-box;
-            width: 100%; /* 너비를 100%로 설정 */
+            width: 100%;
         }
         input[name="nickname"],
         input[name="report-nickname"] {
             border: 2px solid #007bff;
             height: 40px;
         }
-        input[name="prompt"] {
+        textarea[name="prompt"] {
             border: 2px solid #28a745;
             min-height: 100px;
-            resize: vertical;
+            resize: vertical; /* 사용자가 크기를 조정할 수 있도록 설정 */
+            padding-bottom: 30px; /* 문자가 잘리지 않도록 하단 여유 추가 */
+        }
+        .char-count {
+            color: #666;
+            position: absolute;
+            bottom: 5px;
+            right: 10px;
+            font-size: 14px;
         }
         button {
             background-color: #007bff;
@@ -88,7 +98,7 @@
             font-size: 16px;
             cursor: pointer;
             transition: background-color 0.3s;
-            width: 100%; /* 너비를 100%로 설정 */
+            width: 100%;
         }
         button:hover {
             background-color: #0056b3;
@@ -99,65 +109,87 @@
             border-radius: 4px;
             min-height: 100px;
             box-sizing: border-box;
-            width: 100%; /* 너비를 100%로 설정 */
+            width: 100%;
+            overflow-y: auto; /* 스크롤 가능하도록 설정 */
         }
         .chat-section #response {
             border: 1px solid #ddd;
         }
         .report-section #evidence {
             border: 1px solid #ddd;
+            max-height: 400px; /* 최대 높이 설정 */
         }
         .report-section input[name="report-nickname"] {
             border-color: #dc3545;
             height: 35px;
-            width: 250px; /* 신고 기능 박스 너비 */
+            width: 250px;
         }
         .report-section button {
             background-color: #dc3545;
-            width: 250px; /* 신고 기능 버튼 너비 */
+            width: 250px;
         }
         .report-section button:hover {
             background-color: #c82333;
         }
     </style>
     <script>
-        // AJAX 요청을 처리하는 함수
         function sendMessage(event) {
-            event.preventDefault(); // 폼의 기본 제출 동작을 막음
+            event.preventDefault();
 
             const nickname = document.querySelector('input[name="nickname"]').value;
-            const prompt = document.querySelector('input[name="prompt"]').value;
+            const prompt = document.querySelector('textarea[name="prompt"]').value;
 
-            // fetch 함수를 사용하여 비동기적으로 서버에 요청을 보냄
             fetch(`/bot/chat?nickname=${encodeURIComponent(nickname)}&prompt=${encodeURIComponent(prompt)}`)
-                .then(response => response.json()) // 서버 응답을 JSON 형태로 변환
+                .then(response => response.json())
                 .then(data => {
-                    // JSON 응답에서 메시지를 추출하여 페이지에 표시
                     document.getElementById('response').textContent = data.response;
                 })
-                .catch(error => console.error('Error:', error)); // 에러 처리
+                .catch(error => console.error('Error:', error));
         }
 
-        // 신고 기능을 처리하는 함수
         function reportUser(event) {
-            event.preventDefault(); // 폼의 기본 제출 동작을 막음
+            event.preventDefault();
 
             const reportNickname = document.querySelector('input[name="report-nickname"]').value;
 
-            // fetch 함수를 사용하여 비동기적으로 서버에 요청을 보냄
             fetch(`/bot/report?nickname=${encodeURIComponent(reportNickname)}`)
-                .then(response => response.json()) // 서버 응답을 JSON 형태로 변환
+                .then(response => response.json())
                 .then(data => {
-                    // JSON 응답에서 증거물을 추출하여 페이지에 표시
-                    document.getElementById('evidence').textContent = data.evidence;
+
+                    if (data.status === 'error') {
+                        const p = document.createElement('p');
+                        p.textContent = data.message;
+                        p.style.color = 'red';
+                        evidenceDiv.appendChild(p);
+                    } else {
+                        data.evidence.forEach(item => {
+                            const p = document.createElement('p');
+                            p.textContent = `${item.timestamp}: ${item.message}`;
+                            evidenceDiv.appendChild(p);
+                        });
+                    }
                 })
-                .catch(error => console.error('Error:', error)); // 에러 처리
+                .catch(error => console.error('Error:', error));
+        }
+
+        function updateCharCount() {
+            const promptInput = document.querySelector('textarea[name="prompt"]');
+            const charCount = document.querySelector('.char-count');
+            const maxLength = 100;
+            const currentLength = promptInput.value.length;
+
+            // 문자 수가 maxLength를 초과하면 자르기
+            if (currentLength > maxLength) {
+                promptInput.value = promptInput.value.substring(0, maxLength);
+            }
+
+            // 문자 수 표시 업데이트
+            charCount.textContent = `${Math.min(currentLength, maxLength)}/${maxLength} characters`;
         }
     </script>
 </head>
 <body>
 <div class="container">
-    <!-- 대화 창 섹션 -->
     <div class="chat-section">
         <h2>Chat with GPT</h2>
         <form onsubmit="sendMessage(event)">
@@ -165,17 +197,16 @@
                 <input type="text" name="nickname" placeholder="Enter your nickname" required>
             </div>
             <div class="form-group">
-                <input type="text" name="prompt" placeholder="Enter your message" required>
+                <textarea name="prompt" placeholder="Enter your message" required oninput="updateCharCount()"></textarea>
+                <div class="char-count">0/100 characters</div>
             </div>
             <button type="submit">Send</button>
         </form>
 
         <div id="response">
-            <!-- 서버 응답을 표시할 영역 -->
         </div>
     </div>
 
-    <!-- 신고 기능 섹션 -->
     <div class="report-section">
         <h3>Report User</h3>
         <form onsubmit="reportUser(event)">
@@ -186,7 +217,6 @@
         </form>
 
         <div id="evidence">
-            <!-- 신고 증거물이 표시될 영역 -->
         </div>
     </div>
 </div>
