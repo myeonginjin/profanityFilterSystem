@@ -1,25 +1,46 @@
 package com.study.profanityFilterSystem.service;
-
 import com.study.profanityFilterSystem.entity.Dialog;
 import com.study.profanityFilterSystem.entity.Users;
 import com.study.profanityFilterSystem.repository.DialogRepository;
 import com.study.profanityFilterSystem.repository.UsersRepository;
+import com.study.profanityFilterSystem.filtering.AhoCorasick;
+import com.study.profanityFilterSystem.filtering.BadWordFiltering;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.study.profanityFilterSystem.utils.BadWordLoader;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class ChatService {
-
     @Autowired
     private UsersRepository usersRepository;
 
     @Autowired
     private DialogRepository dialogRepository;
 
-    // 사용자를 확인하고 필요 시 새로 생성하는 메서드
+    private final AhoCorasick ahoCorasick;
+    private final BadWordFiltering badWordFiltering;
+
+    public ChatService() throws IOException {
+        ahoCorasick = new AhoCorasick();
+        badWordFiltering = new BadWordFiltering();
+        initializeBadWords();
+    }
+
+    private void initializeBadWords() throws IOException {
+        List<String> badWords = BadWordLoader.loadBadWords("badwords.txt");
+        for (String word : badWords) {
+            ahoCorasick.addKeyword(word);
+        }
+        ahoCorasick.buildFailureLinks();
+        badWordFiltering.addBadWords(badWords);
+    }
+
     public Users getOrCreateUser(String userName) {
         Users user = usersRepository.findByUserName(userName);
         if (user == null) {
@@ -40,7 +61,6 @@ public class ChatService {
         return dialog;
     }
 
-    // 특정 유저의 최근 3일간의 대화 내역 조회
     public List<Dialog> getRecentDialogs(String userName) throws Exception {
         Users user = usersRepository.findByUserName(userName);
         if (user == null) {
@@ -48,6 +68,16 @@ public class ChatService {
         }
 
         LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(3);
-        return dialogRepository.findByUserIDAndTimestampAfter(user.getUserID(), threeDaysAgo);
+        List<Dialog> recentDialogs = dialogRepository.findByUserIDAndTimestampAfter(user.getUserID(), threeDaysAgo);
+        List<Dialog> filteredDialogs = new ArrayList<>();
+
+        for (Dialog dialog : recentDialogs) {
+            Set<String> badWordsFound = ahoCorasick.search(dialog.getMessage());
+            if (!badWordsFound.isEmpty() || badWordFiltering.checkBadWord(dialog.getMessage())) {
+                filteredDialogs.add(dialog);
+            }
+        }
+
+        return filteredDialogs;
     }
 }
