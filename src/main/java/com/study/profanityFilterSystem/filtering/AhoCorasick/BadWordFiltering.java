@@ -1,4 +1,4 @@
-package com.study.profanityFilterSystem.filtering;
+package com.study.profanityFilterSystem.filtering.AhoCorasick;
 
 import java.util.*;
 import java.util.regex.*;

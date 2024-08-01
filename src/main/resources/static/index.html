@@ -131,6 +131,18 @@
         .report-section button:hover {
             background-color: #c82333;
         }
+
+        #time-taken {
+            color: #dc3545; /* 붉은 색으로 가시성 향상 */
+            font-size: 18px; /* 글씨 크기 증가 */
+            font-weight: bold; /* 글씨 두껍게 */
+            text-align: center;
+            margin-top: 10px;
+            padding: 10px;
+            border: 2px solid #dc3545; /* 테두리 추가 */
+            border-radius: 5px; /* 둥근 테두리 */
+            background-color: #ffe6e6; /* 배경 색상 추가 */
+        }
     </style>
     <script>
         function sendMessage(event) {
@@ -151,12 +163,15 @@
             event.preventDefault();
 
             const reportNickname = document.querySelector('input[name="report-nickname"]').value;
+            const startTime = performance.now();  // 신고 시작 시간 기록
 
             fetch(`/bot/report?nickname=${encodeURIComponent(reportNickname)}`)
                 .then(response => response.json())
                 .then(data => {
                     const evidenceDiv = document.getElementById('evidence');
-                    evidenceDiv.innerHTML = ''; // 증거를 추가하기 전에 내용을 초기화
+                    const timeTakenDiv = document.getElementById('time-taken');  // 시간 표시 영역
+
+                    evidenceDiv.innerHTML = '';
 
                     if (data.status === 'error') {
                         const p = document.createElement('p');
@@ -169,11 +184,14 @@
                             p.textContent = `${item.timestamp}: ${item.message}`;
                             evidenceDiv.appendChild(p);
                         });
+
+                        const endTime = performance.now();  // 신고 종료 시간 기록
+                        const timeTaken = (endTime - startTime) / 1000;  // s 단위로 변환
+                        timeTakenDiv.textContent = `처리 시간: ${timeTaken.toFixed(2)} s`;
                     }
                 })
                 .catch(error => console.error('Error:', error));
         }
-
 
         function updateCharCount() {
             const promptInput = document.querySelector('textarea[name="prompt"]');
@@ -221,6 +239,7 @@
 
         <div id="evidence">
         </div>
+        <div id="time-taken"></div> <!-- 신고 처리 시간 표시 영역 -->
     </div>
 </div>
 </body>

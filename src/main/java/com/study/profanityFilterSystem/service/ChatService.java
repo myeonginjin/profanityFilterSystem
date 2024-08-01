@@ -1,10 +1,11 @@
 package com.study.profanityFilterSystem.service;
+
 import com.study.profanityFilterSystem.entity.Dialog;
 import com.study.profanityFilterSystem.entity.Users;
 import com.study.profanityFilterSystem.repository.DialogRepository;
 import com.study.profanityFilterSystem.repository.UsersRepository;
-import com.study.profanityFilterSystem.filtering.AhoCorasick;
-import com.study.profanityFilterSystem.filtering.BadWordFiltering;
+import com.study.profanityFilterSystem.filtering.AhoCorasick.AhoCorasick;
+import com.study.profanityFilterSystem.filtering.AhoCorasick.BadWordFiltering;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.study.profanityFilterSystem.utils.BadWordLoader;
@@ -67,11 +68,10 @@ public class ChatService {
             throw new Exception("해당 이름의 유저를 찾을 수 없습니다.");
         }
 
-        LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(3);
-        List<Dialog> recentDialogs = dialogRepository.findByUserIDAndTimestampAfter(user.getUserID(), threeDaysAgo);
+        List<Dialog> allDialogs = dialogRepository.findByUserID(user.getUserID());
         List<Dialog> filteredDialogs = new ArrayList<>();
 
-        for (Dialog dialog : recentDialogs) {
+        for (Dialog dialog : allDialogs) {
             Set<String> badWordsFound = ahoCorasick.search(dialog.getMessage());
             if (!badWordsFound.isEmpty() || badWordFiltering.checkBadWord(dialog.getMessage())) {
                 filteredDialogs.add(dialog);
