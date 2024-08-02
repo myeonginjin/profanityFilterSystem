@@ -68,12 +68,11 @@ public class ChatService {
             throw new Exception("해당 이름의 유저를 찾을 수 없습니다.");
         }
 
-        List<Dialog> allDialogs = dialogRepository.findByUserID(user.getUserID());
+        List<Dialog> recentDialogs = dialogRepository.findByUserID(user.getUserID());
         List<Dialog> filteredDialogs = new ArrayList<>();
 
-        for (Dialog dialog : allDialogs) {
-            Set<String> badWordsFound = ahoCorasick.search(dialog.getMessage());
-            if (!badWordsFound.isEmpty() || badWordFiltering.checkBadWord(dialog.getMessage())) {
+        for (Dialog dialog : recentDialogs) {
+            if (badWordFiltering.checkBadWord(dialog.getMessage())) {
                 filteredDialogs.add(dialog);
             }
         }
