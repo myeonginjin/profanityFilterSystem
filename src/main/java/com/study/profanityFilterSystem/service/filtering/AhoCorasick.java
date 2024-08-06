@@ -1,20 +1,21 @@
-package com.study.profanityFilterSystem.filtering.AhoCorasick;
+package com.study.profanityFilterSystem.service.filtering;
 
 import java.util.*;
 
 public class AhoCorasick {
+
     private TrieNode root;
 
     public AhoCorasick() {
         root = new TrieNode();
     }
 
-    public void addKeyword(String keyword) {
+    public void addKeyword(String keyword, String wordType) {
         TrieNode node = root;
         for (char c : keyword.toCharArray()) {
             node = node.children.computeIfAbsent(c, k -> new TrieNode());
         }
-        node.outputs.add(keyword);
+        node.outputs.put(keyword, wordType);
     }
 
     public void buildFailureLinks() {
@@ -43,7 +44,7 @@ public class AhoCorasick {
                 } else {
                     child.fail = root;
                 }
-                child.outputs.addAll(child.fail.outputs);
+                child.outputs.putAll(child.fail.outputs);
             }
         }
     }
@@ -61,9 +62,26 @@ public class AhoCorasick {
             } else {
                 node = root;
             }
-            result.addAll(node.outputs);
+            //수정필요
+            result.addAll(node.outputs.values());
         }
-
         return result;
     }
+
+//    public String searchAllowWord(String text) {
+//        TrieNode node = root;
+//
+//        for (char c : text.toCharArray()) {
+//            while (node != root && !node.children.containsKey(c)) {
+//                node = node.fail;
+//            }
+//            if (node.children.containsKey(c)) {
+//                node = node.children.get(c);
+//            } else {
+//                node = root;
+//            }
+//            result.addAll(node.outputs);
+//        }
+//
+//    }
 }

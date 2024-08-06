@@ -36,13 +36,16 @@
         }
         .chat-section {
             background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #d0e6e8;
         }
         .report-section {
             padding: 20px;
             background-color: #e9f5f6;
             border-radius: 8px;
             border: 1px solid #d0e6e8;
-            overflow-y: auto; /* 스크롤 가능하도록 설정 */
+            overflow-y: auto;
         }
         h2, h3 {
             color: #333;
@@ -59,8 +62,14 @@
         .form-group {
             width: 100%;
             display: flex;
-            justify-content: center;
-            position: relative; /* 부모에 대해 자식 요소를 위치시키기 위함 */
+            flex-direction: column;
+            gap: 5px;
+            position: relative;
+        }
+        .form-group label {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
         }
         input[name="nickname"],
         textarea[name="prompt"],
@@ -70,17 +79,17 @@
             font-size: 16px;
             box-sizing: border-box;
             width: 100%;
+            border: 2px solid #007bff;
         }
         input[name="nickname"],
         input[name="report-nickname"] {
-            border: 2px solid #007bff;
             height: 40px;
         }
         textarea[name="prompt"] {
-            border: 2px solid #28a745;
             min-height: 100px;
-            resize: vertical; /* 사용자가 크기를 조정할 수 있도록 설정 */
-            padding-bottom: 30px; /* 문자가 잘리지 않도록 하단 여유 추가 */
+            resize: vertical;
+            padding-bottom: 30px;
+            border: 2px solid #28a745;
         }
         .char-count {
             color: #666;
@@ -110,38 +119,42 @@
             min-height: 100px;
             box-sizing: border-box;
             width: 100%;
-            overflow-y: auto; /* 스크롤 가능하도록 설정 */
+            overflow-y: auto;
         }
         .chat-section #response {
             border: 1px solid #ddd;
         }
         .report-section #evidence {
             border: 1px solid #ddd;
-            max-height: 400px; /* 최대 높이 설정 */
+            max-height: 400px;
         }
         .report-section input[name="report-nickname"] {
-            border-color: #dc3545;
             height: 35px;
-            width: 250px;
+            width: 100%;
         }
-        .report-section button {
-            background-color: #dc3545;
-            width: 250px;
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
         }
-        .report-section button:hover {
-            background-color: #c82333;
+        .button-group button {
+            background-color: #6c757d;
+            width: 100%;
         }
-
+        .button-group button:hover {
+            background-color: #5a6268;
+        }
         #time-taken {
-            color: #dc3545; /* 붉은 색으로 가시성 향상 */
-            font-size: 18px; /* 글씨 크기 증가 */
-            font-weight: bold; /* 글씨 두껍게 */
+            color: #dc3545;
+            font-size: 18px;
+            font-weight: bold;
             text-align: center;
             margin-top: 10px;
             padding: 10px;
-            border: 2px solid #dc3545; /* 테두리 추가 */
-            border-radius: 5px; /* 둥근 테두리 */
-            background-color: #ffe6e6; /* 배경 색상 추가 */
+            border: 2px solid #dc3545;
+            border-radius: 5px;
+            background-color: #ffe6e6;
         }
     </style>
     <script>
@@ -159,19 +172,21 @@
                 .catch(error => console.error('Error:', error));
         }
 
-        function reportUser(event) {
+        function reportUser(event, endpoint) {
             event.preventDefault();
 
             const reportNickname = document.querySelector('input[name="report-nickname"]').value;
-            const startTime = performance.now();  // 신고 시작 시간 기록
+            const startTime = performance.now();
 
-            fetch(`/bot/report?nickname=${encodeURIComponent(reportNickname)}`)
+            fetch(`/bot/${endpoint}?nickname=${encodeURIComponent(reportNickname)}`)
                 .then(response => response.json())
                 .then(data => {
                     const evidenceDiv = document.getElementById('evidence');
-                    const timeTakenDiv = document.getElementById('time-taken');  // 시간 표시 영역
-
                     evidenceDiv.innerHTML = '';
+
+                    const endTime = performance.now();
+                    const timeTaken = ((endTime - startTime) / 1000).toFixed(2);
+                    document.getElementById('time-taken').textContent = `Time taken: ${timeTaken} seconds`;
 
                     if (data.status === 'error') {
                         const p = document.createElement('p');
@@ -184,10 +199,6 @@
                             p.textContent = `${item.timestamp}: ${item.message}`;
                             evidenceDiv.appendChild(p);
                         });
-
-                        const endTime = performance.now();  // 신고 종료 시간 기록
-                        const timeTaken = (endTime - startTime) / 1000;  // s 단위로 변환
-                        timeTakenDiv.textContent = `처리 시간: ${timeTaken.toFixed(2)} s`;
                     }
                 })
                 .catch(error => console.error('Error:', error));
@@ -199,12 +210,10 @@
             const maxLength = 100;
             const currentLength = promptInput.value.length;
 
-            // 문자 수가 maxLength를 초과하면 자르기
             if (currentLength > maxLength) {
                 promptInput.value = promptInput.value.substring(0, maxLength);
             }
 
-            // 문자 수 표시 업데이트
             charCount.textContent = `${Math.min(currentLength, maxLength)}/${maxLength} characters`;
         }
     </script>
@@ -215,31 +224,37 @@
         <h2>Chat with GPT</h2>
         <form onsubmit="sendMessage(event)">
             <div class="form-group">
-                <input type="text" name="nickname" placeholder="Enter your nickname" required>
+                <label for="nickname">Nickname:</label>
+                <input type="text" id="nickname" name="nickname" placeholder="Enter your nickname" required>
             </div>
             <div class="form-group">
-                <textarea name="prompt" placeholder="Enter your message" required oninput="updateCharCount()"></textarea>
+                <label for="prompt">Message:</label>
+                <textarea id="prompt" name="prompt" placeholder="Enter your message" required oninput="updateCharCount()"></textarea>
                 <div class="char-count">0/100 characters</div>
             </div>
             <button type="submit">Send</button>
         </form>
 
-        <div id="response">
-        </div>
+        <div id="response"></div>
     </div>
 
     <div class="report-section">
         <h3>Report User</h3>
-        <form onsubmit="reportUser(event)">
+        <form>
             <div class="form-group">
-                <input type="text" name="report-nickname" placeholder="Enter nickname to report" required>
+                <label for="report-nickname">Report Nickname:</label>
+                <input type="text" id="report-nickname" name="report-nickname" placeholder="Enter nickname to report" required>
             </div>
-            <button type="submit">Report</button>
+            <div class="button-group">
+                <button type="button" onclick="reportUser(event, 'reportWithAhoCorasick')">Report With Aho-Corasick</button>
+                <button type="button" onclick="reportUser(event, 'reportWith1')">Report With Method 1</button>
+                <button type="button" onclick="reportUser(event, 'reportWith2')">Report With Method 2</button>
+                <button type="button" onclick="reportUser(event, 'reportWith3')">Report With Method 3</button>
+            </div>
         </form>
 
-        <div id="evidence">
-        </div>
-        <div id="time-taken"></div> <!-- 신고 처리 시간 표시 영역 -->
+        <div id="evidence"></div>
+        <div id="time-taken"></div>
     </div>
 </div>
 </body>

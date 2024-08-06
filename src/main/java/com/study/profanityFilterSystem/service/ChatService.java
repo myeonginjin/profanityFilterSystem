@@ -4,17 +4,16 @@ import com.study.profanityFilterSystem.entity.Dialog;
 import com.study.profanityFilterSystem.entity.Users;
 import com.study.profanityFilterSystem.repository.DialogRepository;
 import com.study.profanityFilterSystem.repository.UsersRepository;
-import com.study.profanityFilterSystem.filtering.AhoCorasick.AhoCorasick;
-import com.study.profanityFilterSystem.filtering.AhoCorasick.BadWordFiltering;
+import com.study.profanityFilterSystem.service.filtering.AhoCorasick;
+import com.study.profanityFilterSystem.service.filtering.PatternFiltering;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.study.profanityFilterSystem.utils.BadWordLoader;
+import com.study.profanityFilterSystem.utils.BanWordLoader;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class ChatService {
@@ -25,21 +24,21 @@ public class ChatService {
     private DialogRepository dialogRepository;
 
     private final AhoCorasick ahoCorasick;
-    private final BadWordFiltering badWordFiltering;
+    private final PatternFiltering patternFiltering;
 
     public ChatService() throws IOException {
         ahoCorasick = new AhoCorasick();
-        badWordFiltering = new BadWordFiltering();
-        initializeBadWords();
+        patternFiltering = new PatternFiltering();
+        initializeBanWords();
     }
 
-    private void initializeBadWords() throws IOException {
-        List<String> badWords = BadWordLoader.loadBadWords("badwords.txt");
-        for (String word : badWords) {
-            ahoCorasick.addKeyword(word);
+    private void initializeBanWords() throws IOException {
+        List<String> banWords = BanWordLoader.loadBanWords("banWords.txt");
+        for (String word : banWords) {
+            ahoCorasick.addKeyword(word, "Ban");
         }
         ahoCorasick.buildFailureLinks();
-        badWordFiltering.addBadWords(badWords);
+        patternFiltering.addBanWords(banWords, "Ban");
     }
 
     public Users getOrCreateUser(String userName) {
@@ -72,7 +71,7 @@ public class ChatService {
         List<Dialog> filteredDialogs = new ArrayList<>();
 
         for (Dialog dialog : recentDialogs) {
-            if (badWordFiltering.checkBadWord(dialog.getMessage())) {
+            if (patternFiltering.checkBanWord(dialog.getMessage())) {
                 filteredDialogs.add(dialog);
             }
         }

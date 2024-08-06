@@ -1,9 +1,10 @@
-package com.study.profanityFilterSystem.filtering.AhoCorasick;
+package com.study.profanityFilterSystem.service.filtering;
 
 import java.util.*;
+
 
 public class TrieNode {
     Map<Character, TrieNode> children = new HashMap<>();
     TrieNode fail;
-    Set<String> outputs = new HashSet<>();
+    Map<String, String> outputs = new HashMap<>();
 }
