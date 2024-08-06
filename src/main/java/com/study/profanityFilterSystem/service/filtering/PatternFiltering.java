@@ -4,12 +4,18 @@ import java.util.*;
 
 public class PatternFiltering {
     private final Set<String> banWordsSet = new HashSet<>();
+    private final Set<String> allowWordsSet = new HashSet<>();
     private final AhoCorasick ahoCorasick = new AhoCorasick();
 
-    public void addBanWords(Collection<String> banWords, String wordType) {
-        banWordsSet.addAll(banWords);
+    public void addWords(String wordType, Collection<String> banWords) {
+        if(wordType.equals("banWord")) {
+            banWordsSet.addAll(banWords);
+        } else {
+            allowWordsSet.addAll(banWords);
+        }
+
         for (String word : banWords) {
-            ahoCorasick.addKeyword(word, wordType);
+            ahoCorasick.addKeyword(wordType, word);
         }
         ahoCorasick.buildFailureLinks();
     }
