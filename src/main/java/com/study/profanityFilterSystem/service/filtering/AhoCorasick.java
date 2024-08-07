@@ -66,7 +66,8 @@ public class AhoCorasick {
             for (Map.Entry<String, String> entry : node.outputs.entrySet()) {
                 String word = entry.getValue();
                 int startPosition = endPosition - word.length() + 1;
-                outputWordPositionData.add(new int[]{outputWords.size(), startPosition, endPosition});
+                int isBanWord = entry.getKey().equals("banWord") ? 1 : 0;
+                outputWordPositionData.add(new int[]{outputWords.size(), isBanWord, startPosition, endPosition});
                 outputWords.add(word);
             }
             endPosition++;
