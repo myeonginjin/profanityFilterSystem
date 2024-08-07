@@ -13,11 +13,9 @@ public class AhoCorasick {
     public void addKeyword(String wordType, String keyword) {
         TrieNode node = root;
         for (char c : keyword.toCharArray()) {
-            System.out.println(c + "?");
             node = node.children.computeIfAbsent(c, k -> new TrieNode());
         }
         node.outputs.put(wordType, keyword);
-        System.out.println(node.outputs);
     }
 
     public void buildFailureLinks() {
@@ -65,14 +63,10 @@ public class AhoCorasick {
                 node = root;
             }
 
-            //System.out.println(node.outputs.size() +" size");
-
             //일단 아웃풋 중에 금칙어만 추가 (로직 변경 필요)
             for (Map.Entry<String, String> entry : node.outputs.entrySet()) {
-                System.out.println(entry.getKey() + ": " + entry.getValue());
                 if (entry.getKey().equals("banWord")) {result.add(entry.getValue());}
             }
-            //result.addAll(node.outputs.values());
         }
         return result;
     }

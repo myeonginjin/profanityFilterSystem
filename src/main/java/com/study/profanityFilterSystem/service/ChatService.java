@@ -38,24 +38,11 @@ public class ChatService {
     }
 
     private void initializeBanWords() throws IOException {
-
-        //금칙어 노드 트라이에 삽입
         List<String> banWords = wordListLoader.loadWords(String.valueOf(WordType.banWord));
-//        for (String word : banWords) {
-//            System.out.println(word);
-//            ahoCorasick.addKeyword(String.valueOf(WordType.banWord), word);
-//        }
-        //허용어 노드 트라이에 삽입
-//        List<String> allowWords = wordListLoader.loadWords(String.valueOf(WordType.allowWord));
-//        for (String word : allowWords) {
-//            ahoCorasick.addKeyword(String.valueOf(WordType.allowWord), word);
-//        }
+        List<String> allowWords = wordListLoader.loadWords(String.valueOf(WordType.allowWord));
 
-        //ahoCorasick.buildFailureLinks();
-
-        //왜 아래가 필요한자?
         patternFiltering.addWords(String.valueOf(WordType.banWord), banWords);
-        //patternFiltering.addWords(String.valueOf(WordType.allowWord), allowWords);
+        patternFiltering.addWords(String.valueOf(WordType.allowWord), allowWords);
     }
 
     public Users getOrCreateUser(String userName) {

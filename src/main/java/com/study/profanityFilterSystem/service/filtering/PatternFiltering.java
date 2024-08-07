@@ -3,18 +3,18 @@ package com.study.profanityFilterSystem.service.filtering;
 import java.util.*;
 
 public class PatternFiltering {
-    private final Set<String> banWordsSet = new HashSet<>();
-    private final Set<String> allowWordsSet = new HashSet<>();
+//    private final Set<String> banWordsSet = new HashSet<>();
+//    private final Set<String> allowWordsSet = new HashSet<>();
     private final AhoCorasick ahoCorasick = new AhoCorasick();
 
-    public void addWords(String wordType, Collection<String> banWords) {
-        if(wordType.equals("banWord")) {
-            banWordsSet.addAll(banWords);
-        } else {
-            allowWordsSet.addAll(banWords);
-        }
+    public void addWords(String wordType, Collection<String> words) {
+//        if(wordType.equals("banWord")) {
+//            banWordsSet.addAll(banWords);
+//        } else {
+//            allowWordsSet.addAll(banWords);
+//        }
 
-        for (String word : banWords) {
+        for (String word : words) {
             ahoCorasick.addKeyword(wordType, word);
         }
         ahoCorasick.buildFailureLinks();
