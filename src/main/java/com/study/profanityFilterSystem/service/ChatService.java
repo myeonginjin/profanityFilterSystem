@@ -27,12 +27,9 @@ public class ChatService {
 
     @Autowired
     private DialogRepository dialogRepository;
-
-    private final AhoCorasick ahoCorasick;
     private final PatternFiltering patternFiltering;
 
     public ChatService() throws IOException {
-        ahoCorasick = new AhoCorasick();
         patternFiltering = new PatternFiltering();
         initializeBanWords();
     }
@@ -55,14 +52,13 @@ public class ChatService {
         return user;
     }
 
-    public Dialog saveDialog(Long userID, Long partnerUserID, String message) {
+    public void saveDialog(Long userID, Long partnerUserID, String message) {
         Dialog dialog = new Dialog();
         dialog.setUserID(userID);
         dialog.setPartnerUserID(partnerUserID);
         dialog.setMessage(message);
         dialog.setTimestamp(LocalDateTime.now());
         dialogRepository.save(dialog);
-        return dialog;
     }
 
     public List<Dialog> getRecentDialogs(String userName) throws Exception {

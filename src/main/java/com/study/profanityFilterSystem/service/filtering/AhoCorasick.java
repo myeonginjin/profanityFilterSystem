@@ -5,7 +5,6 @@ import java.util.*;
 public class AhoCorasick {
 
     private TrieNode root;
-
     public AhoCorasick() {
         root = new TrieNode();
     }
@@ -49,9 +48,9 @@ public class AhoCorasick {
         }
     }
 
-    public Set<String> search(String text) {
-        Set<String> result = new HashSet<>();
+    public void search(String text, List<int[]> outputWordPositionData, List<String> outputWords) {
         TrieNode node = root;
+        int endPosition = 0;
 
         for (char c : text.toCharArray()) {
             while (node != root && !node.children.containsKey(c)) {
@@ -62,29 +61,15 @@ public class AhoCorasick {
             } else {
                 node = root;
             }
-
+            //배열을 원소한 리스트로 해결하기
             //일단 아웃풋 중에 금칙어만 추가 (로직 변경 필요)
             for (Map.Entry<String, String> entry : node.outputs.entrySet()) {
-                if (entry.getKey().equals("banWord")) {result.add(entry.getValue());}
+                String word = entry.getValue();
+                int startPosition = endPosition - word.length() + 1;
+                outputWordPositionData.add(new int[]{outputWords.size(), startPosition, endPosition});
+                outputWords.add(word);
             }
+            endPosition++;
         }
-        return result;
     }
-
-//    public String searchAllowWord(String text) {
-//        TrieNode node = root;
-//
-//        for (char c : text.toCharArray()) {
-//            while (node != root && !node.children.containsKey(c)) {
-//                node = node.fail;
-//            }
-//            if (node.children.containsKey(c)) {
-//                node = node.children.get(c);
-//            } else {
-//                node = root;
-//            }
-//            result.addAll(node.outputs);
-//        }
-//
-//    }
 }
