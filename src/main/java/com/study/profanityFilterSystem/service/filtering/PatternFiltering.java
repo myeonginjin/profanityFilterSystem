@@ -55,7 +55,7 @@ public class PatternFiltering {
         int allowWordLastPosition = -1;
 
         while (!queue.isEmpty()) {
-            int[] outputWordPositionData = queue.poll();
+            int[] outputWordPositionData = queue.poll();  // 추후 배열이 아닌 클래스로 변경 필요
             int wordStartPosition = outputWordPositionData[2];
             int wordEndPosition = outputWordPositionData[3];
             boolean isBanWord = outputWordPositionData[1]==1;
